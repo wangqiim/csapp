@@ -11,6 +11,10 @@
 #include "cachelab.h"
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
+void transpose_32_32(int M, int N, int A[N][M], int B[M][N]);
+void transpose_64_64(int M, int N, int A[N][M], int B[M][N]);
+void transpose_61_67(int M, int N, int A[N][M], int B[M][N]);
+
 
 /* 
  * transpose_submit - This is the solution transpose function that you
@@ -20,14 +24,52 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
  *     be graded. 
  */
 char transpose_submit_desc[] = "Transpose submission";
-void transpose_submit(int M, int N, int A[N][M], int B[M][N])
-{
+void transpose_submit(int M, int N, int A[N][M], int B[M][N]) {
+    if (M == 32 && N == 32) transpose_32_32(M, N, A, B);
+    else if (M == 64 && N == 64) transpose_64_64(M, N, A, B);
+    else if (M == 61 && N == 67)transpose_61_67(M, N, A, B);
 }
+
 
 /* 
  * You can define additional transpose functions below. We've defined
  * a simple one below to help you get started. 
  */ 
+void transpose_32_32(int M, int N, int A[N][M], int B[M][N]) {
+    int tmp[8][8];
+    for (int i = 0 ; i < M; i += 8)
+        for (int j = 0; j < N; j += 8) {
+            for (int x = 0; x < 8; x++)
+                for (int y = 0; y < 8; y++)
+                    tmp[x][y] = A[x + i][j + y];
+            for (int y = 0; y < 8; y++)
+                for (int x = 0; x < 8; x++)
+                    B[j + y][x + i] = tmp[x][y];
+        }
+}
+
+void transpose_64_64(int M, int N, int A[N][M], int B[M][N]) {
+    int tmp[8][8];
+    for (int i = 0 ; i < M; i += 8)
+        for (int j = 0; j < N; j += 8) {
+            for (int x = 0; x < 8; x++)
+                for (int y = 0; y < 8; y++)
+                    tmp[x][y] = A[x + i][j + y];
+            for (int y = 0; y < 8; y++)
+                for (int x = 0; x < 8; x++)
+                    B[j + y][x + i] = tmp[x][y];
+        }
+}
+
+void transpose_61_67(int M, int N, int A[N][M], int B[M][N]) {
+    for (int i = 0 ; i < N; i += 17)
+        for (int j = 0; j < M; j += 17)
+            for (int x = 0; x < 17 && x + i < N; x++)
+                for (int y = 0; y < 17 && y + j < M; y++)
+                    B[j + y][x + i] = A[x + i][j + y];
+}
+
+
 
 /* 
  * trans - A simple baseline transpose function, not optimized for the cache.
